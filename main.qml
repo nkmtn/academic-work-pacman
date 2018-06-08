@@ -21,10 +21,12 @@ Window {
             color: "black"
             anchors.fill: parent
             onGameStarted: {
-                gameplay.start()
+                gameplay.newgame()
                 parent.state = "gameplay"
             }
-            onGameContinued: parent.state = "gameplay"
+            onGameContinued: {
+                parent.state = "gameplay"
+            }
         }
 
         Gameplay {

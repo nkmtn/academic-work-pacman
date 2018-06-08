@@ -6,8 +6,16 @@ Item {
     width: 48
     height: 48
 
+    property var gameField
     property vector2d direction: Qt.vector2d(1,0)
+    property vector2d newDirection: Qt.vector2d(1,0)
     signal exit
+
+    function setCoordinates(x, y)
+    {
+        hero.x = x
+        hero.y = y
+    }
 
     SpriteSequence {
         id: spriteSequence
@@ -72,84 +80,78 @@ Item {
     }
 
     Keys.onPressed: {
-//        if (event.isAutoRepeat) {
-//            return;
-//        }
+        //        if (event.isAutoRepeat) {
+        //            return;
+        //        }
 
-        heroController.handle(hero, event, spriteSequence);
+        newDirection = heroController.handle(hero, event, spriteSequence);
 
-//        switch (event.key) {
-//        case Qt.Key_Left:
-//        case Qt.Key_A:
-//            direction.x = -1
-//            direction.y = 0
-//            r.jumpTo("left")
-//            break;
-//        case Qt.Key_Right:
-//        case Qt.Key_D:
-//            direction.x = 1
-//            direction.y = 0
-//            r.jumpTo("right")
-//            break;
-//        case Qt.Key_Up:
-//        case Qt.Key_W:
-//            direction.x = 0
-//            direction.y = -1
-//            r.jumpTo("up")
-//            break;
-//        case Qt.Key_Down:
-//        case Qt.Key_S:
-//            direction.x = 0
-//            direction.y = 1
-//            r.jumpTo("down")
-//            break;
-//        case Qt.Key_Escape:
-//            exit()
-//        }
+        //        switch (event.key) {
+        //        case Qt.Key_Left:
+        //        case Qt.Key_A:
+        //            direction.x = -1
+        //            direction.y = 0
+        //            r.jumpTo("left")
+        //            break;
+        //        case Qt.Key_Right:
+        //        case Qt.Key_D:
+        //            direction.x = 1
+        //            direction.y = 0
+        //            r.jumpTo("right")
+        //            break;
+        //        case Qt.Key_Up:
+        //        case Qt.Key_W:
+        //            direction.x = 0
+        //            direction.y = -1
+        //            r.jumpTo("up")
+        //            break;
+        //        case Qt.Key_Down:
+        //        case Qt.Key_S:
+        //            direction.x = 0
+        //            direction.y = 1
+        //            r.jumpTo("down")
+        //            break;
+        //        case Qt.Key_Escape:
+        //            exit()
+        //        }
     }
 
-    Behavior on x {
-        id: behaviorX
-        PropertyAnimation{duration: 120}
-    }
-    Behavior on y {
-        id: behaviorY
-        PropertyAnimation{duration: 120}
-    }
 
     Timer {
-        interval: 120
+        id: timer
+        interval: 30
         triggeredOnStart: true
         running: hero.visible
         repeat: true
+        property int step: 0
         onTriggered: {
-            hero.x += direction.x * 12
-            hero.y += direction.y * 12
-            if(hero.x > 1280)
-            {
-                behaviorX.enabled = false
+            hero.x += direction.x * 3
+            hero.y += direction.y * 3
+
+            step = (step + 1) % 16
+
+            if (step == 0) {
+                if (newDirection !== direction)
+                    direction = newDirection
+                direction = levelManager.handleCollisions(hero, gameField)
+                hero.x = (hero.x / 48).toFixed(0) * 48
+                hero.y = (hero.y / 48).toFixed(0) * 48
+            }
+
+            if (direction.x === 1 && direction.y === 0) spriteSequence.jumpTo("right")
+            if (direction.x === -1 && direction.y === 0) spriteSequence.jumpTo("left")
+            if (direction.x === 0 && direction.y === 1) spriteSequence.jumpTo("down")
+            if (direction.x === 0 && direction.y === -1) spriteSequence.jumpTo("up")
+
+            if(hero.x > 720 - 48) {
                 hero.x = -48
-                behaviorX.enabled = true
-            }
-            else if(hero.x < -48)
-            {
-                behaviorX.enabled = false
-                hero.x = 1280
-                behaviorX.enabled = true
-            }
-            if(hero.y > 720)
-            {
-                behaviorY.enabled = false
+            } else if(hero.x < -48) {
+                hero.x = 720 - 48
+            } if(hero.y > 720 - 48) {
                 hero.y = -48
-                behaviorY.enabled = true
-            }
-            else if(hero.y < -48)
-            {
-                behaviorY.enabled = false
-                hero.y = 720
-                behaviorY.enabled = true
+            } else if(hero.y < -48) {
+                hero.y = 720 - 48
             }
         }
     }
-
 }

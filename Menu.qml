@@ -13,13 +13,15 @@ Rectangle {
         spacing: 5
         Button {
             text: "Новая игра"
-            onClicked:{
+            onClicked: {
                 menu.gameStarted()
             }
         }
         Button {
             text: "Продолжить"
-            onClicked: menu.gameContinued()
+            onClicked: {
+                menu.gameContinued()
+            }
         }
         Button {
             text: "Выход"
